@@ -6,47 +6,46 @@ use Illuminate\Database\Eloquent\Model;
 
 use JeroenDesloovere\VCard\VCard;
 
+use App\Response;
+
 class VCardP extends Model
 {
-    protected $fillable = ['firstname', 'lastname', 'company', 'jobtitle', 'role', 'email', 'phonenumber', 'phonenumber_sec', 'address', 'label', 'url'];
+    protected $fillable = ['funcionariosid', 'idcliente', 'nome', 'cpf', 'email', 'telefone', 
+                            'situacao', 'pa_intranet', 'codpa_intranet', 'codpa_sisbr', 'setor',
+                            'codsetor', 'pa_sisbr', 'dt_atualizacao', 'funcao', 'setor_intranet',
+                            'celular', 'pa_intranet_secundario', 'codpa_intranet_secundario',
+                            'codpa_ref_sisbr_secundario'];
 
-    protected $dates = ['deleted_at'];
+    //protected $dates = ['deleted_at'];
 
-    protected $table = 'v_cards';
+    protected $primaryKey = 'idcliente';
+
+    protected $table = 'funcionarios';
 
 
     
-    public function geraVCardFuncionario($aInfo){
+    public static function geraVCardFuncionario($aInfo){
         $vcard = new VCard();
-
-        $lastname = 'Desloovere';
-        $firstname = 'Jeroen';
-        $additional = '';
-        $prefix = '';
-        $suffix = '';
-
+                
+        $name = \explode(' ', $aInfo["NOME"]);
+        
+        $lastname = $name[sizeof($name) -1];
+        $firstname = $name[0];
         // add personal data
-        $vcard->addName($lastname, $firstname, $additional, $prefix, $suffix);
+        $vcard->addName($lastname, $firstname);
 
         // add work data
-        $vcard->addCompany('Siesqo');
-        $vcard->addJobtitle('Web Developer');
-        $vcard->addRole('Data Protection Officer');
-        $vcard->addEmail('info@jeroendesloovere.be');
-        $vcard->addPhoneNumber(1234121212, 'PREF;WORK');
-        $vcard->addPhoneNumber(123456789, 'WORK');
-        $vcard->addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium');
-        $vcard->addLabel('street, worktown, workpostcode Belgium');
-        $vcard->addURL('http://www.jeroendesloovere.be');
+        $vcard->addCompany('SICOOB CREDICOM');
+        $vcard->addJobtitle($aInfo["FUNCAO"]);
+        $vcard->addRole($aInfo["SETOR"]);
+        $vcard->addEmail($aInfo["EMAIL"]);
+        $vcard->addPhoneNumber($aInfo["TELEFONE"], 'PREF;WORK');
+        $vcard->addPhoneNumber($aInfo["CELULAR"], 'WORK');
+        $vcard->addAddress('Avenida do Contorno 4265', 'São Lucas', '30110-021', 'Belo Horizonte - MG');
+        $vcard->addLabel('Rua/Avenida Nº, Bairro, CEP, Cidade');
+        $vcard->addURL('https://www.sicoobcredicom.com.br');
 
-        $vcard->addPhoto(__DIR__ . '/landscape.jpeg');
-
-        // return vcard as a string
-        //return $vcard->getOutput();
-
-        // return vcard as a download
-        return $vcard->download();
-
+        return $vcard->getOutput();        
     }
 
 }
